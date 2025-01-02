@@ -79,3 +79,32 @@ def convert_to_corners(box):
     x2 = x_center + width / 2
     y2 = y_center + height / 2
     return torch.stack([x1, y1, x2, y2], dim=1)
+
+def compute_high_freq(features):
+    kernel = torch.tensor([[0, -1, 0],
+                           [-1, 4, -1],
+                           [0, -1, 0]], dtype=torch.float32).unsqueeze(0).unsqueeze(0)
+    high_freq_features = torch.nn.functional.conv2d(features.unsqueeze(0), kernel, padding=1)
+    return high_freq_features.squeeze(0)
+
+
+def compute_low_freq(features):
+    low_freq_features = torch.nn.functional.avg_pool2d(features, kernel_size=2, stride=2)
+    return low_freq_features
+
+
+def smooth_features(features):
+    kernel_size = 5
+    gaussian_kernel = torch.tensor([[1, 4, 6, 4, 1],
+                                    [4, 16, 24, 16, 4],
+                                    [6, 24, 36, 24, 6],
+                                    [4, 16, 24, 16, 4],
+                                    [1, 4, 6, 4, 1]], dtype=torch.float32) / 256.0
+    gaussian_kernel = gaussian_kernel.unsqueeze(0).unsqueeze(0)
+    smoothed_features = torch.nn.functional.conv2d(features.unsqueeze(0), gaussian_kernel, padding=2)
+    return smoothed_features.squeeze(0)
+
+
+def compute_flow(F_l_t, F_l_t_next):
+    flow = F_l_t_next - F_l_t  # Placeholder, 实际情况可能需要使用更复杂的光流算法
+    return flow

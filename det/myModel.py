@@ -1,30 +1,26 @@
 import torch
-from ultralytics import YOLO
+import cv2
+import numpy as np
+from ultralytics import YOLO  # 直接使用YOLOv8
+
+class YOLOv8DetectorModule:
+    def __init__(self, model_path):
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model = YOLO(model_path).to(self.device)
+
+    def preprocess_image(self, image):
+        img = cv2.resize(image, (640, 640))
+        img = img[:, :, ::-1]  # BGR to RGB
+        img = img / 255.0  # Normalize to [0, 1]
+        return img
+
+    def detect_objects(self, image):
+        img = self.preprocess_image(image)
+        img_tensor = torch.tensor(img).permute(2, 0, 1).unsqueeze(0).to(self.device)
+        with torch.no_grad():
+            results = self.model(img_tensor)
+        return results[0].boxes
 
 
-class YOLOv8Detector:
-    def __init__(self, model_path='models/yolov8n.pt'):
-        # 初始化 YOLOv8 模型
-        self.model = YOLO(model_path)
 
-    def detect_objects(self, frame):
-        # 使用 YOLOv8 进行目标检测
-        results = self.model(frame)
 
-        detections = []
-        for box in results[0].boxes:
-            x_min, y_min, x_max, y_max = box.xyxy[0]
-            detections.append([x_min.item(), y_min.item(), x_max.item(), y_max.item()])
-
-        return detections, results[0].features  # 返回检测结果和特征图
-
-    def forward(self, frames):
-        # 直接处理一批帧，用于训练时
-        results = self.model(frames)
-
-        detections = []
-        for box in results[0].boxes:
-            x_min, y_min, x_max, y_max = box.xyxy[0]
-            detections.append([x_min.item(), y_min.item(), x_max.item(), y_max.item()])
-
-        return {"detections": detections, "features": results[0].features}
