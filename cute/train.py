@@ -20,6 +20,7 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
+# 相对路径
 # 数据集路径
 image_dir = '../data/MOT17-RF/train/MOT17-02-FRCNN/img1'  # 图片帧所在文件夹
 gt_file = '../data/MOT17-RF/train/MOT17-02-FRCNN/det/det.txt'  # 标注文件路径
