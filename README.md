@@ -16,5 +16,5 @@
 ## 🚀 let's start
 the core code in [cute](cute) document.
 
-netx ...
+next coming soon ...
 
